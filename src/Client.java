@@ -17,11 +17,12 @@ public class Client extends Thread{
         String name = generateName(1) + " of " + generateName(1);
         NetworkClient client = new NetworkClient(null, name, "YEET");
         int id = client.getMyPlayerNumber();
+        System.out.println("My player number is " + id);
 
-        Bot speedyBot = new Bot(Bot.BotType.Speedy);
-        Bot fatBot = new Bot(Bot.BotType.Fatty);
-        Bot wallBot = new Bot(Bot.BotType.Ghosty);
-        Bot[] bots = {speedyBot, fatBot, wallBot};
+        Bot speedyBot = new Bot(Bot.BotType.Speedy, id);
+        Bot ghostBot = new Bot(Bot.BotType.Ghosty, id);
+        Bot fatBot = new Bot(Bot.BotType.Fatty, id);
+        Bot[] bots = {speedyBot, ghostBot, fatBot};
 
         GraphNode[] graph = client.getGraph();
         HashMap<GraphNode, Float> extraWeights = calculateExtraWeights(graph);

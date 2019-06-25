@@ -11,17 +11,30 @@ public class Bot {
     }
 
     final public BotType type;
+    final public int ownerID;
 
     private float[] targetPos;
     private Pathfinding pathfindingThread = null;
     private GraphNode[] path;
 
-    public Bot(BotType type) {
+    public Bot(BotType type, int ownerID) {
         this.type = type;
+        this.ownerID = ownerID;
         targetPos = new float[] {1f, 0f, 0f};
     }
     
     public float update(GraphNode[] graph, HashMap<GraphNode, Float> extraWeights, float[] position, float[] direction) {
+        // basic targeting
+        if(MathUtils.distanceOnUnitSphere(position, targetPos) < 0.3f) {
+            targetPos = new float[] {
+                (float) Math.random() * 2f - 1f,
+                (float) Math.random() * 2f - 1f,
+                (float) Math.random() * 2f - 1f
+            };
+
+            MathUtils.normalize(targetPos);
+        }
+
         // if path is null consume a pathfinding thread
         if(path == null) {
             if(pathfindingThread != null) {
@@ -38,7 +51,7 @@ public class Bot {
             GraphNode targetNode = closestNode(graph, targetPos);
 
             // TODO dynamic limit maybe
-            pathfindingThread = new Pathfinding(currentNode, targetNode, extraWeights, 2000);
+            pathfindingThread = new Pathfinding(currentNode, targetNode, extraWeights, 2000, type == BotType.Ghosty, ownerID);
             pathfindingThread.start();
         }
 

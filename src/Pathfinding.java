@@ -10,14 +10,18 @@ public class Pathfinding extends Thread {
     private GraphNode goal;
     private HashMap<GraphNode, Float> extraWeights;
     private long msLimit;
+    private boolean ignoreWalls;
+    private int ownerID;
 
     public GraphNode[] resultPath = null;
 
-    public Pathfinding(GraphNode start, GraphNode goal, HashMap<GraphNode, Float> extraWeights, long msLimit) {
+    public Pathfinding(GraphNode start, GraphNode goal, HashMap<GraphNode, Float> extraWeights, long msLimit, boolean ignoreWalls, int ownerID) {
         this.start = start;
         this.goal = goal;
         this.extraWeights = extraWeights;
         this.msLimit = msLimit;
+        this.ignoreWalls = ignoreWalls;
+        this.ownerID = ownerID;
     }
 
     public void run() {
@@ -78,7 +82,7 @@ public class Pathfinding extends Thread {
             
             // for each neighbor of current
             for (GraphNode neighbor : current.neighbors) {
-                if(neighbor.blocked) continue;
+                if(neighbor.blocked && !ignoreWalls) continue;
 
                 if(closedSet.contains(neighbor))
                     continue;		// Ignore the neighbor which is already evaluated.
@@ -88,8 +92,12 @@ public class Pathfinding extends Thread {
                 
                 // The distance from start to a neighbor
                 float cost = heuristic_cost_estimate(neighbor, current) // identical to the estimate for direct neighbors
-                    + extraWeights.getOrDefault(neighbor, 0f) // some extra costs that are assigned to nodes
+                    + (ignoreWalls? 0f : extraWeights.getOrDefault(neighbor, 0f)) // some extra costs that are assigned to nodes
                 ;
+
+                // see how many points we would get and reduce cost accordingly
+                float points = (neighbor.owner == 0? 1f: (neighbor.owner == ownerID? 0f : 1.5f));
+                cost -= points * 0.02f;
 
                 float tentative_gScore = gScore.getOrDefault(current, Float.POSITIVE_INFINITY) + cost;
                 if (tentative_gScore >= gScore.getOrDefault(neighbor, Float.POSITIVE_INFINITY))
