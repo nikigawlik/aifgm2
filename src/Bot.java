@@ -16,6 +16,7 @@ public class Bot {
     private float[] targetPos;
     private Pathfinding pathfindingThread = null;
     private GraphNode[] path;
+    // private float[] prevPos;
 
     public Bot(BotType type, int ownerID) {
         this.type = type;
@@ -24,6 +25,13 @@ public class Bot {
     }
     
     public float update(GraphNode[] graph, HashMap<GraphNode, Float> extraWeights, float[] position, float[] direction) {
+        // float[] delta = MathUtils.copy(position);
+        // if(prevPos == null) prevPos = position;
+        // MathUtils.subtract(delta, prevPos);
+        // float speed = MathUtils.length(delta);
+        // System.out.println("Bot " + type + " speed: " + speed);
+
+        float returnAngle = 0f;
         // basic targeting
         if(MathUtils.distanceOnUnitSphere(position, targetPos) < 0.3f) {
             targetPos = new float[] {
@@ -84,21 +92,27 @@ public class Bot {
             
             
             if(nextNode != null) {
-                return lookTowards(position, direction, posFromNode(nextNode));
+                returnAngle = lookTowards(position, direction, posFromNode(nextNode));
             }
         }
 
-        // just wiggle around
-        System.out.println("wiggle wiggle wiggle");
-        return (float) Math.random() + 4f;
+        if(returnAngle == 0f) {
+            // just wiggle around, it's better than going straight
+            // System.out.println("wiggle wiggle wiggle");
+            returnAngle = (float) Math.random() + 4f;
+        }
+        
+        // prevPos = MathUtils.copy(position);
+
+        return returnAngle;
     }
 
     private GraphNode closestNode(GraphNode[] graph, float[] position) {
         return Arrays.stream(graph).parallel()
-                .min((a, b) -> Float.compare(
-                    MathUtils.distanceSquared(posFromNode(a), position),
-                    MathUtils.distanceSquared(posFromNode(b), position)))
-                .get();
+            .min((a, b) -> Float.compare(
+                MathUtils.distanceSquared(posFromNode(a), position),
+                MathUtils.distanceSquared(posFromNode(b), position)))
+            .get();
     }
 
     private static float lookTowards(float[] position, float[] direction, float[] target) {
