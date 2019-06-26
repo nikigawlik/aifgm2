@@ -29,6 +29,7 @@ public class Client extends Thread{
         HashMap<GraphNode, Float> extraWeights = calculateExtraWeights(graph);
 
         float energy = 1f;
+        boolean botIsCharging = false;
         long t0 = System.nanoTime();
 
         while (client.isAlive()) {
@@ -48,18 +49,47 @@ public class Client extends Thread{
             for(int botID = 0; botID < 3; botID++) {
                 if(isLoadingZone(client.getBotPosition(id, botID))) {
                     energy = 1f;
+                    botIsCharging = false;
                     break;
                 }
             }
 
-            System.out.println("deltaTime: " + deltaTime);
-            System.out.println("energy: " + energy);
-            
+            // System.out.println("deltaTime: " + deltaTime);
+            // System.out.println("energy: " + energy);
+
             for(int botID = 0; botID < 3; botID++) {
-                float[] position = client.getBotPosition(id, botID); // array with x,y,z
+                bots[botID].position = client.getBotPosition(id, botID);
+            }
+
+            // target assignment
+            if(energy < 0.75 && !botIsCharging) {
+                float bestDistance = Float.POSITIVE_INFINITY;
+                Bot bestBot = null;
+                for (int botID = 0; botID < 3; botID++) {
+                    float estimatedDistance = bots[botID].estimateDistanceToNextLoadingZone();
+                    if(estimatedDistance < bestDistance) {
+                        bestDistance = estimatedDistance;
+                        bestBot = bots[botID];
+                    }
+                }
+
+                bestBot.goToNextLoadingZone();
+                botIsCharging = true;
+            }
+
+            // other targets
+            for (int botID = 0; botID < 3; botID++) {
+                if(bots[botID].targetPos == null) {
+                    bots[botID].targetPos = MathUtils.randomPointOnUnitSphere(); // random for now TODO
+
+                }
+            }
+
+            // call update methods            
+            for(int botID = 0; botID < 3; botID++) {
                 float[] direction = client.getBotDirection(botID); // array with x,y,z
                 Bot bot = bots[botID];
-                float deltaAngle = bot.update(graph, extraWeights, position, direction);
+                float deltaAngle = bot.update(graph, extraWeights, direction);
                 try {
                     client.changeMoveDirection(botID, deltaAngle);
                 } catch(RuntimeException e) {
@@ -70,7 +100,7 @@ public class Client extends Thread{
             long t = System.nanoTime() - t0;
 
             try {
-                long delay = 500;
+                long delay = 200;
                 Thread.sleep(Math.max(delay - t / 1000000, 0));
             } catch (InterruptedException e) {
                 e.printStackTrace();

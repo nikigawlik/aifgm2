@@ -50,6 +50,12 @@ public class MathUtils {
         return (float) Math.acos(a.x * b.x + a.y * b.y + a.x * b.y); // distance on unit sphere
     }
 
+    public static float[] randomPointOnUnitSphere() {
+        float[] vec = new float[] {(float) Math.random() * 2f - 1f, (float) Math.random() * 2f - 1f, (float) Math.random() * 2f - 1f};
+        MathUtils.normalize(vec);
+        return vec;
+    }
+
     public static void main(String[] args) {
         // float[] test = cross(new float[] {-1, 0, 0}, new float[] {0, 0, 1});
         // System.out.println(Arrays.deepToString(test));

@@ -12,19 +12,36 @@ public class Bot {
 
     final public BotType type;
     final public int ownerID;
+    final float[][] loadingZones = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
 
-    private float[] targetPos;
     private Pathfinding pathfindingThread = null;
     private GraphNode[] path;
-    // private float[] prevPos;
+    
+    public float[] position;
+    public float[] targetPos;
 
     public Bot(BotType type, int ownerID) {
         this.type = type;
         this.ownerID = ownerID;
-        targetPos = new float[] {1f, 0f, 0f};
+        // targetPos = new float[] {1f, 0f, 0f};
+    }
+
+    public float estimateDistanceToNextLoadingZone() {
+        float adjustmentFactor = type == BotType.Speedy ? 1.0f : 1.7f; // factor to account for non-direct paths
+        return adjustmentFactor * (float) Arrays.stream(loadingZones)
+        .mapToDouble((vec) -> MathUtils.distanceOnUnitSphere(vec, position))
+        .min().getAsDouble();
+    }
+
+    public void goToNextLoadingZone() {
+        targetPos = Arrays.stream(loadingZones)
+        .min((v1, v2) -> Float.compare(
+            MathUtils.distanceOnUnitSphere(v1, position), 
+            MathUtils.distanceOnUnitSphere(v2, position)))
+        .get();
     }
     
-    public float update(GraphNode[] graph, HashMap<GraphNode, Float> extraWeights, float[] position, float[] direction) {
+    public float update(GraphNode[] graph, HashMap<GraphNode, Float> extraWeights, float[] direction) {
         // float[] delta = MathUtils.copy(position);
         // if(prevPos == null) prevPos = position;
         // MathUtils.subtract(delta, prevPos);
@@ -32,15 +49,9 @@ public class Bot {
         // System.out.println("Bot " + type + " speed: " + speed);
 
         float returnAngle = 0f;
-        // basic targeting
-        if(MathUtils.distanceOnUnitSphere(position, targetPos) < 0.3f) {
-            targetPos = new float[] {
-                (float) Math.random() * 2f - 1f,
-                (float) Math.random() * 2f - 1f,
-                (float) Math.random() * 2f - 1f
-            };
 
-            MathUtils.normalize(targetPos);
+        if(MathUtils.distanceOnUnitSphere(position, targetPos) < 0.3f) {
+            targetPos = null;
         }
 
         // if path is null consume a pathfinding thread
@@ -54,7 +65,7 @@ public class Bot {
         }
 
         // if pathfinding thread is null create a new one
-        if(pathfindingThread == null) {
+        if(pathfindingThread == null && targetPos != null) {
             GraphNode currentNode = path != null? path[path.length - 1] : closestNode(graph, position);
             GraphNode targetNode = closestNode(graph, targetPos);
 
@@ -64,7 +75,6 @@ public class Bot {
         }
 
         if(path != null) {
-
             // find the furthest path node that you have reached and remove closer ones
             boolean reached = false;
             GraphNode nextNode = path[path.length - 1];
