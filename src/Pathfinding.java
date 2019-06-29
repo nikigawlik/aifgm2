@@ -12,16 +12,18 @@ public class Pathfinding extends Thread {
     private long msLimit;
     private boolean ignoreWalls;
     private int ownerID;
+    private int rivalID;
 
     public GraphNode[] resultPath = null;
 
-    public Pathfinding(GraphNode start, GraphNode goal, HashMap<GraphNode, Float> extraWeights, long msLimit, boolean ignoreWalls, int ownerID) {
+    public Pathfinding(GraphNode start, GraphNode goal, HashMap<GraphNode, Float> extraWeights, long msLimit, boolean ignoreWalls, int ownerID, int rivalID) {
         this.start = start;
         this.goal = goal;
         this.extraWeights = extraWeights;
         this.msLimit = msLimit;
         this.ignoreWalls = ignoreWalls;
         this.ownerID = ownerID;
+        this.rivalID = rivalID;
     }
 
     public void run() {
@@ -96,7 +98,12 @@ public class Pathfinding extends Thread {
                 ;
 
                 // see how many points we would get and reduce cost accordingly
-                float points = (neighbor.owner == 0? .25f: (neighbor.owner == (ownerID+1)? 0f : 1.5f));
+                float points = 
+                    neighbor.owner == 0 ? .25f : 
+                    neighbor.owner == (ownerID+1) ? 0f : 
+                    neighbor.owner == (rivalID+1) ? 1.5f :
+                    .75f
+                ;
                 if(Math.random() < 0.01) System.out.println("cost: " + cost);
                 cost -= points * 0.02f;
                 cost = Math.max(0.0001f, cost);

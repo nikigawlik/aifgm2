@@ -17,6 +17,7 @@ public class Bot {
     private Pathfinding pathfindingThread = null;
     private GraphNode[] path;
     
+    public Integer rivalID = null;
     public float[] position;
     public float[] targetPos;
 
@@ -75,7 +76,7 @@ public class Bot {
 
             // we calculate for a shorter time if it's urgent
             int timeLimit = path == null? 500 : 1000;
-            pathfindingThread = new Pathfinding(currentNode, targetNode, extraWeights, timeLimit, type == BotType.Ghosty, ownerID);
+            pathfindingThread = new Pathfinding(currentNode, targetNode, extraWeights, timeLimit, type == BotType.Ghosty, ownerID, rivalID);
             pathfindingThread.start();
         }
 

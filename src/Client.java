@@ -39,9 +39,9 @@ public class Client extends Thread{
             float deltaTime = Math.max(0.001f, (System.nanoTime() - t0) / 1000000000f);
             t0 = System.nanoTime();
 
-            client.getBotSpeed(0); // raw constant
-            client.getScore(id);
+            // client.getBotSpeed(0); // raw constant
             // client.changeMoveDirection(1, -0.15f * ((float) Math.random() * 2.0f - 1.0f));
+
 
             graph = client.getGraph();
 
@@ -58,8 +58,27 @@ public class Client extends Thread{
             // System.out.println("deltaTime: " + deltaTime);
             // System.out.println("energy: " + energy);
 
+            // get the player in front, pointwise
+            Integer[] ranking = Arrays.stream(new Integer[] {0, 1, 2})
+            .sorted((a, b) -> Integer.compare(client.getScore(a), client.getScore(b)))
+            .toArray(Integer[]::new);
+            
+            int rivalID = -7;
+            for(int i = 0; i < 3; i++) {
+                if(ranking[i] == id) {
+                    if(i == 2) {
+                        rivalID = ranking[i-1];
+                        break;
+                    } else {
+                        rivalID = ranking[i+1];
+                        break;
+                    }
+                }
+            }
+
             for(int botID = 0; botID < 3; botID++) {
                 bots[botID].position = client.getBotPosition(id, botID);
+                bots[botID].rivalID = rivalID;
             }
 
             // target assignment
