@@ -96,7 +96,8 @@ public class Pathfinding extends Thread {
                 ;
 
                 // see how many points we would get and reduce cost accordingly
-                float points = (neighbor.owner == 0? 1f: (neighbor.owner == (ownerID+1)? 0f : 1.5f));
+                float points = (neighbor.owner == 0? .25f: (neighbor.owner == (ownerID+1)? 0f : 1.5f));
+                if(Math.random() < 0.01) System.out.println("cost: " + cost);
                 cost -= points * 0.02f;
                 cost = Math.max(0.0001f, cost);
 

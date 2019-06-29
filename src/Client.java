@@ -79,13 +79,24 @@ public class Client extends Thread{
             }
 
             // other targets
+            float targetDistance = 1f; // preferred distance to target
             for (int botID = 0; botID < 3; botID++) {
-                if(bots[botID].targetPos == null) {
-                    bots[botID].targetPos = MathUtils.randomPointOnUnitSphere(); // random for now TODO
-                    // Arrays.stream(graph)
-                    // .parallel()
-                    // .filter((n) -> (n.owner != 0 && n.owner != id+1))
-                    // .min((n1, n2) -> MathUtils.distanceOnUnitSphere(a, b))
+                Bot bot = bots[botID];
+                if (bot.targetPos == null) {
+                    System.out.println("pre targ: " + ((System.nanoTime() - t0) / 1000000) + " ms");
+                    GraphNode targetNode = Arrays.stream(graph)
+                        .parallel()
+                        .filter((n) -> (n.owner != 0 && n.owner != id + 1))
+                        .min((n1, n2) -> Float.compare(
+                            Math.abs(MathUtils.distanceOnUnitSphere(n1, bot.position) - targetDistance),
+                            Math.abs(MathUtils.distanceOnUnitSphere(n2, bot.position) - targetDistance)))
+                        .orElseGet(() -> null);
+                    System.out.println("post targ: " + ((System.nanoTime() - t0) / 1000000) + " ms");
+                    if(targetNode != null) {
+                        bot.targetPos = new float[] {targetNode.x, targetNode.y, targetNode.z};
+                    } else {
+                        bot.targetPos = MathUtils.randomPointOnUnitSphere();
+                    }
                 }
             }
 
@@ -167,12 +178,12 @@ public class Client extends Thread{
     private String generateCatchphrase() {
         String[] words = new String[] { "Ignoramus", "Blitzkrieg", "Dawdle", "Polymath", "Repertoire", "Tramontane", "Stellar", "Pithy", "Quiver", "Clod" };
 
-        String[] adjectives = new String[] {"abhorrent", "ablaze", "abnormal", "abrasive", "acidic", "alluring", "ambiguous", "amuck", "apathetic", "aquatic", "auspicious", "axiomatic", "", "barbarous", "bawdy", "belligerent", "berserk", "bewildered", "billowy", "boorish", "brainless", "bustling", "", "cagey", "calculating", "callous", "capricious", "ceaseless", "chemical", "chivalrous", "cloistered", "coherent", "colossal", "combative", "cooing", "cumbersome", "cynical", "", "daffy", "damaged", "deadpan", "deafening", "debonair", "decisive", "defective", "defiant", "demonic", "delerious", "deranged", "devilish", "didactic", "diligent", "direful", "disastrous", "disillusioned", "dispensable", "divergent", "domineering", "draconian", "dynamic", "", "earsplitting", "earthy", "eatable", "efficacious", "elastic", "elated", "elfin", "elite", "enchanted", "endurable", "erratic", "ethereal", "evanescent", "exuberant", "exultant", "", "fabulous", "fallacious", "fanatical", "fearless", "feeble", "feigned", "fierce", "flagrant", "fluttering", "frantic", "fretful", "fumbling", "furtive", "", "gainful", "gamy", "garrulous", "gaudy", "glistening", "grandiose", "grotesque", "gruesome", "guiltless", "guttural", "", "habitual", "hallowed", "hapless", "harmonious", "hellish", "hideous", "highfalutin", "hissing", "holistic", "hulking", "humdrum", "hypnotic", "hysterical", "", "icky", "idiotic", "illustrious", "immense", "immenent", "incandescent", "industrious", "infamous", "inquisitive", "insidious", "invincible", "", "jaded", "jazzy", "jittery", "judicious", "jumbled", "juvenile", "", "kaput", "keen", "knotty", "knowing", "", "lackadaisical", "lamentable", "languid", "lavish", "lewd", "longing", "loutish", "ludicrous", "lush", "luxuriant", "lyrical", "", "macabre", "maddening", "mammoth", "maniacal", "meek", "melodic", "merciful", "mere", "miscreant", "momentous", "", "nappy", "nebulous", "nimble", "nippy", "nonchalant", "nondescript", "noxious", "numberless", "", "oafish", "obeisant", "obsequious", "oceanic", "omniscient", "onerous", "optimal", "ossified", "overwrought", "", "paltry", "parched", "parsimonious", "penitent", "perpetual", "picayune", "piquant", "placid", "plucky", "prickly", "probable", "profuse", "psychedelic", "", "quack", "quaint", "quarrelsome", "questionable", "quirky", "quixotic", "quizzical", "", " rabbid", "rambunctious", "rampat", "raspy", "recondite", "resolute", "rhetorical", "ritzy", "ruddy", "", "sable", "sassy", "savory", "scandalous", "scintillating", "sedate", "shaggy", "shrill", "smoggy", "somber", "sordid", "spiffy", "spurious", "squalid", "statuesque", "steadfast", "stupendous", "succinct", "swanky", "sweltering", "", "taboo", "tacit", "tangy", "tawdry", "tedious", "tenuous", "testy", "thundering", "tightfisted", "torpid", "trite", "truculent", "", "ubiquitous", "ultra", "unwieldy", "uppity", "utopian", "utter", "", "vacuous", "vagabond", "vengeful", "venomous", "verdant", "versed", "victorious", "vigorous", "vivacious", "voiceless", "volatile", "voracious", "vulgar", "", "wacky", "waggish", "wakeful", "warlike", "wary", "whimsical", "whispering", "wiggly", "wiry", "wistful", "woebegone", "woozy", "wrathful", "wretched", "wry", "", " xenial", "xenophilic", "", "yummy", "yappy", "yielding", "", "zany", "zazzy", "zealous", "zesty", "zippy", "zoetic", "zoic", "zonked"};
+        String[] adjectives = new String[] {"abhorrent", "ablaze", "abnormal", "abrasive", "acidic", "alluring", "ambiguous", "amuck", "apathetic", "aquatic", "auspicious", "axiomatic", "barbarous", "bawdy", "belligerent", "berserk", "bewildered", "billowy", "boorish", "brainless", "bustling", "cagey", "calculating", "callous", "capricious", "ceaseless", "chemical", "chivalrous", "cloistered", "coherent", "colossal", "combative", "cooing", "cumbersome", "cynical", "daffy", "damaged", "deadpan", "deafening", "debonair", "decisive", "defective", "defiant", "demonic", "delerious", "deranged", "devilish", "didactic", "diligent", "direful", "disastrous", "disillusioned", "dispensable", "divergent", "domineering", "draconian", "dynamic", "earsplitting", "earthy", "eatable", "efficacious", "elastic", "elated", "elfin", "elite", "enchanted", "endurable", "erratic", "ethereal", "evanescent", "exuberant", "exultant", "fabulous", "fallacious", "fanatical", "fearless", "feeble", "feigned", "fierce", "flagrant", "fluttering", "frantic", "fretful", "fumbling", "furtive", "gainful", "gamy", "garrulous", "gaudy", "glistening", "grandiose", "grotesque", "gruesome", "guiltless", "guttural", "habitual", "hallowed", "hapless", "harmonious", "hellish", "hideous", "highfalutin", "hissing", "holistic", "hulking", "humdrum", "hypnotic", "hysterical", "icky", "idiotic", "illustrious", "immense", "immenent", "incandescent", "industrious", "infamous", "inquisitive", "insidious", "invincible", "jaded", "jazzy", "jittery", "judicious", "jumbled", "juvenile", "kaput", "keen", "knotty", "knowing", "lackadaisical", "lamentable", "languid", "lavish", "lewd", "longing", "loutish", "ludicrous", "lush", "luxuriant", "lyrical", "macabre", "maddening", "mammoth", "maniacal", "meek", "melodic", "merciful", "mere", "miscreant", "momentous", "nappy", "nebulous", "nimble", "nippy", "nonchalant", "nondescript", "noxious", "numberless", "oafish", "obeisant", "obsequious", "oceanic", "omniscient", "onerous", "optimal", "ossified", "overwrought", "paltry", "parched", "parsimonious", "penitent", "perpetual", "picayune", "piquant", "placid", "plucky", "prickly", "probable", "profuse", "psychedelic", "quack", "quaint", "quarrelsome", "questionable", "quirky", "quixotic", "quizzical", " rabbid", "rambunctious", "rampat", "raspy", "recondite", "resolute", "rhetorical", "ritzy", "ruddy", "sable", "sassy", "savory", "scandalous", "scintillating", "sedate", "shaggy", "shrill", "smoggy", "somber", "sordid", "spiffy", "spurious", "squalid", "statuesque", "steadfast", "stupendous", "succinct", "swanky", "sweltering", "taboo", "tacit", "tangy", "tawdry", "tedious", "tenuous", "testy", "thundering", "tightfisted", "torpid", "trite", "truculent", "ubiquitous", "ultra", "unwieldy", "uppity", "utopian", "utter", "vacuous", "vagabond", "vengeful", "venomous", "verdant", "versed", "victorious", "vigorous", "vivacious", "voiceless", "volatile", "voracious", "vulgar", "wacky", "waggish", "wakeful", "warlike", "wary", "whimsical", "whispering", "wiggly", "wiry", "wistful", "woebegone", "woozy", "wrathful", "wretched", "wry", " xenial", "xenophilic", "yummy", "yappy", "yielding", "zany", "zazzy", "zealous", "zesty", "zippy", "zoetic", "zoic", "zonked"};
 
         
         Random random = new Random();
         String text = "";
-        text += adjectives[random.nextInt(adjectives.length)] + " ";
+        // text += adjectives[random.nextInt(adjectives.length)] + " ";
         text += adjectives[random.nextInt(adjectives.length)] + " ";
         text += words[random.nextInt(words.length)] + "!";
 
