@@ -59,6 +59,10 @@ public class Bot {
             if(pathfindingThread != null) {
                 if(!pathfindingThread.isAlive()) {
                     path = pathfindingThread.resultPath;
+                    if(closestNode(graph, targetPos) == path[path.length - 1]) {
+                        // targetPos will be reached eventually, so we can already set it to null
+                        targetPos = null;
+                    }
                     pathfindingThread = null;
                 }
             }
@@ -69,8 +73,9 @@ public class Bot {
             GraphNode currentNode = path != null? path[path.length - 1] : closestNode(graph, position);
             GraphNode targetNode = closestNode(graph, targetPos);
 
-            // TODO dynamic limit maybe
-            pathfindingThread = new Pathfinding(currentNode, targetNode, extraWeights, 2000, type == BotType.Ghosty, ownerID);
+            // we calculate for a shorter time if it's urgent
+            int timeLimit = path == null? 500 : 1000;
+            pathfindingThread = new Pathfinding(currentNode, targetNode, extraWeights, timeLimit, type == BotType.Ghosty, ownerID);
             pathfindingThread.start();
         }
 

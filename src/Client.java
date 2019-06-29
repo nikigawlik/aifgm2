@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -81,7 +82,10 @@ public class Client extends Thread{
             for (int botID = 0; botID < 3; botID++) {
                 if(bots[botID].targetPos == null) {
                     bots[botID].targetPos = MathUtils.randomPointOnUnitSphere(); // random for now TODO
-
+                    // Arrays.stream(graph)
+                    // .parallel()
+                    // .filter((n) -> (n.owner != 0 && n.owner != id+1))
+                    // .min((n1, n2) -> MathUtils.distanceOnUnitSphere(a, b))
                 }
             }
 
@@ -168,11 +172,9 @@ public class Client extends Thread{
         
         Random random = new Random();
         String text = "";
-        text += "Holy ";
         text += adjectives[random.nextInt(adjectives.length)] + " ";
         text += adjectives[random.nextInt(adjectives.length)] + " ";
         text += words[random.nextInt(words.length)] + "!";
-        text += " I won!";
 
         return text;
     }

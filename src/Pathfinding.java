@@ -98,6 +98,7 @@ public class Pathfinding extends Thread {
                 // see how many points we would get and reduce cost accordingly
                 float points = (neighbor.owner == 0? 1f: (neighbor.owner == (ownerID+1)? 0f : 1.5f));
                 cost -= points * 0.02f;
+                cost = Math.max(0.0001f, cost);
 
                 float tentative_gScore = gScore.getOrDefault(current, Float.POSITIVE_INFINITY) + cost;
                 if (tentative_gScore >= gScore.getOrDefault(neighbor, Float.POSITIVE_INFINITY))

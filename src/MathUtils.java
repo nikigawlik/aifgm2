@@ -47,7 +47,11 @@ public class MathUtils {
     }
 
     public static float distanceOnUnitSphere(GraphNode a, GraphNode b) {
-        return (float) Math.acos(a.x * b.x + a.y * b.y + a.x * b.y); // distance on unit sphere
+        return (float) Math.acos(a.x * b.x + a.y * b.y + a.z * b.z); // distance on unit sphere
+    }
+
+    public static float distanceOnUnitSphere(GraphNode a, float[] b) {
+        return (float) Math.acos(a.x * b[0] + a.y * b[1] + a.z * b[2]); // distance on unit sphere
     }
 
     public static float[] randomPointOnUnitSphere() {
